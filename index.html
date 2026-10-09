@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendario Naturale • Il Guscio della Tartaruga</title>
+    <style>
+        :root {
+            --bg-color: #f4f1ea;
+            --card-bg: #ffffff;
+            --primary: #2d5a27;
+            --accent: #d97706;
+            --text-main: #1f2937;
+            --shell-base: #e5e7eb;
+            --shell-stroke: #4b5563;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 420px;
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.4rem;
+            color: var(--primary);
+            margin-bottom: 6px;
+        }
+
+        p.subtitle {
+            font-size: 0.9rem;
+            color: #6b7280;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        input[type="date"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #d1d5db;
+            border-radius: 12px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="date"]:focus {
+            border-color: var(--primary);
+        }
+
+        /* VISUALIZZATORE SVG DEL GUSCIO */
+        .turtle-container {
+            width: 100%;
+            max-width: 320px;
+            margin: 0 auto 20px auto;
+        }
+
+        svg {
+            width: 100%;
+            height: auto;
+        }
+
+        /* Stili per le placche del guscio */
+        .plate-month, .plate-day {
+            fill: var(--shell-base);
+            stroke: var(--shell-stroke);
+            stroke-width: 1.5;
+            transition: fill 0.3s ease, transform 0.2s;
+            cursor: pointer;
+        }
+
+        .plate-text {
+            font-size: 10px;
+            font-weight: bold;
+            fill: #374151;
+            pointer-events: none;
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
+
+        /* Effetti per l'evidenziazione attivi */
+        .plate-month.active {
+            fill: var(--primary);
+        }
+
+        .plate-day.active {
+            fill: var(--accent);
+        }
+
+        .text-active {
+            fill: #ffffff !important;
+        }
+
+        /* CARD RISULTATO */
+        .result-card {
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: left;
+        }
+
+        .result-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 6px;
+        }
+
+        .month-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 4px;
+        }
+
+        .result-desc {
+            font-size: 0.9rem;
+            color: #4b5563;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Calendario Naturale</h1>
+    <p class="subtitle">Sincronizza il tuo tempo con il guscio della tartaruga</p>
+
+    <div class="input-group">
+        <input type="date" id="dateInput" onchange="calcolaEVisualizza()">
+    </div>
+
+    <!-- GRAFICA SVG INTERATTIVA DELLA TARTARUGA -->
+    <div class="turtle-container">
+        <svg viewBox="0 0 300 340">
+            <g fill="#a7f3d0" stroke="#059669" stroke-width="2">
+                <ellipse cx="150" cy="30" rx="18" ry="22" />
+                <ellipse cx="60" cy="70" rx="30" ry="14" transform="rotate(-30 60 70)" />
+                <ellipse cx="240" cy="70" rx="30" ry="14" transform="rotate(30 240 70)" />
+                <ellipse cx="70" cy="270" rx="26" ry="12" transform="rotate(30 70 270)" />
+                <ellipse cx="230" cy="270" rx="26" ry="12" transform="rotate(-30 230 270)" />
+                <polygon points="150,310 145,330 155,330" />
+            </g>
+
+            <!-- 13 PLACCHE CENTRALI -->
+            <g id="mesiGroup">
+                <rect class="plate-month" id="m-1" x="105" y="70" width="42" height="42" rx="6" />
+                <text class="plate-text" id="mt-1" x="126" y="91">M1</text>
+
+                <rect class="plate-month" id="m-2" x="153" y="70" width="42" height="42" rx="6" />
+                <text class="plate-text" id="mt-2" x="174" y="91">M2</text>
+
+                <rect class="plate-month" id="m-3" x="81" y="117" width="42" height="42" rx="6" />
+                <text class="plate-text" id="mt-3" x="102" y="138">M3</text>
+
+                <rect class="plate-month" id="m-4" x="129" y="117" width="42" height="42" rx="6" />
+                <text class="plate-text" id="mt-4" x="150" y="138">M4</text>
+
+                <rect class="plate-month" id="m-5" x="177" y="117" width="42" height="42" rx="6" />
+                <text class="plate-text" id="mt-5" x="198" y="138">M5</text>
+
+                <rect class="plate-month" id="m-6" x="81" y="164" width="42" height="42" rx="6" />
+                <text class="plate-text" id="mt-6" x="102" y="185">M6</text>
+
+                <rect class="plate-month" id="m-7" x="129" y="164" width="42" height="42" rx="6" />
+                <text class="plate-text" id="mt-7" x="150" y="185">M7</text>
+
+                <rect class="plate-month" id="m-8" x="177" y="164" width="42" height="42" rx="6" />
+                <text class="plate-text" id="mt-8" x="198" y="185">M8</text>
+
+                <rect class="plate-month" id="m-9" x="81" y="211" width="42" height="42" rx="6" />
+                <text class="plate-text" id="mt-9" x="102" y="232">M9</text>
+
+                <rect class="plate-month" id="m-10" x="129" y="211" width="42" height="42" rx="6" />
+                <text class="plate-text" id="mt-10" x="150" y="232">M10</text>
+
+                <rect class="plate-month" id="m-11" x="177" y="211" width="42" height="42" rx="6" />
+                <text class="plate-text" id="mt-11" x="198" y="232">M11</text>
+
+                <rect class="plate-month" id="m-12" x="105" y="258" width="42" height="42" rx="6" />
+                <text class="plate-text" id="mt-12" x="126" y="279">M12</text>
+
+                <rect class="plate-month" id="m-13" x="153" y="258" width="42" height="42" rx="6" />
+                <text class="plate-text" id="mt-13" x="174" y="279">M13</text>
+            </g>
+
+            <!-- BORDO 28 GIORNI -->
+            <g id="bordoGiorniGroup"></g>
+        </svg>
+    </div>
+
+    <!-- SCHEDA RISULTATO CON TEMI SIMBOLICI -->
+    <div class="result-card" id="resultCard">
+        <div class="result-title" id="resTitle">Seleziona una data</div>
+        <div class="month-name" id="resMonthName"></div>
+        <div class="result-desc" id="resDesc">Scegli una data dal calendario per vedere l'archetipo corrispondente.</div>
+    </div>
+</div>
+
+<script>
+    const temiMesi = {
+        1: { nome: "Mese del Germoglio", tema: "Intenzione e primo risveglio dalla terra." },
+        2: { nome: "Mese della Fioritura", tema: "Espansione, creatività e apertura alla luce." },
+        3: { nome: "Mese della Linfa", tema: "Azione, movimento e consolidamento delle radici." },
+        4: { nome: "Mese del Solstizio d'Estate", tema: "Culmine della luce, presenza e chiarezza d'intento." },
+        5: { nome: "Mese della Maturazione", tema: "Nutrimento interiore e crescita dei frutti." },
+        6: { nome: "Mese del Primo Raccolto", tema: "Riconoscimento dei propri talenti e gratitudine." },
+        7: { nome: "Mese dell'Equilibrio", tema: "Integrazione, ascolto e bilanciamento delle forze." },
+        8: { nome: "Mese della Trasformazione", tema: "Lascio andare il superfluo e accolgo il cambiamento." },
+        9: { nome: "Mese del Radicamento", tema: "Ritorno all'essenziale e riposo della terra." },
+        10: { nome: "Mese della Custodia", tema: "Protezione della luce interiore nel buio invernale." },
+        11: { nome: "Mese della Gestazione", tema: "Pazienza, fiducia e protezione del seme profondo." },
+        12: { nome: "Mese della Purificazione", tema: "Pulizia degli spazi interni ed esterni prima del risveglio." },
+        13: { nome: "Mese del Transito", tema: "Completamento del cerchio e preparazione al nuovo inizio." }
+    };
+
+    function generaBordo28Giorni() {
+        const group = document.getElementById('bordoGiorniGroup');
+        const cx = 150, cy = 185;
+        const rx = 125, ry = 135;
+        const totaleTasselli = 28;
+
+        for (let i = 1; i <= totaleTasselli; i++) {
+            const angle = ((i - 1) / totaleTasselli) * (2 * Math.PI) - (Math.PI / 2);
+            const x = cx + rx * Math.cos(angle) - 10;
+            const y = cy + ry * Math.sin(angle) - 10;
+
+            const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            rect.setAttribute("class", "plate-day");
+            rect.setAttribute("id", `d-${i}`);
+            rect.setAttribute("x", x);
+            rect.setAttribute("y", y);
+            rect.setAttribute("width", "20");
+            rect.setAttribute("height", "20");
+            rect.setAttribute("rx", "4");
+
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("class", "plate-text");
+            text.setAttribute("id", `dt-${i}`);
+            text.setAttribute("x", x + 10);
+            text.setAttribute("y", y + 10);
+            text.style.fontSize = "8px";
+            text.textContent = i;
+
+            group.appendChild(rect);
+            group.appendChild(text);
+        }
+    }
+
+    function convertiDataNaturale(dateString) {
+        const parti = dateString.split('-');
+        const annoG = parseInt(parti[0], 10);
+        const meseG = parseInt(parti[1], 10) - 1;
+        const giornoG = parseInt(parti[2], 10);
+
+        const dataSelezionata = Date.UTC(annoG, meseG, giornoG);
+        let ancoraggioAnno = annoG;
+        let ancoraggio = Date.UTC(annoG, 2, 21);
+
+        if (dataSelezionata < ancoraggio) {
+            ancoraggioAnno = annoG - 1;
+            ancoraggio = Date.UTC(ancoraggioAnno, 2, 21);
+        }
+
+        const msInUnGiorno = 1000 * 60 * 60 * 24;
+        const diffInMs = dataSelezionata - ancoraggio;
+        const giornoDanno = Math.floor(diffInMs / msInUnGiorno) + 1;
+
+        if (giornoDanno > 364) {
+            return {
+                anno: ancoraggioAnno,
+                mese: null,
+                giorno: null,
+                isGiornoFuoriTempo: true
+            };
+        }
+
+        const mese = Math.ceil(giornoDanno / 28);
+        const giorno = ((giornoDanno - 1) % 28) + 1;
+
+        return {
+            anno: ancoraggioAnno,
+            mese: mese,
+            giorno: giorno,
+            isGiornoFuoriTempo: false
+        };
+    }
+
+    function calcolaEVisualizza() {
+        const val = document.getElementById('dateInput').value;
+        if (!val) return;
+
+        document.querySelectorAll('.plate-month, .plate-day').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.plate-text').forEach(el => el.classList.remove('text-active'));
+
+        const res = convertiDataNaturale(val);
+        const titleEl = document.getElementById('resTitle');
+        const monthNameEl = document.getElementById('resMonthName');
+        const descEl = document.getElementById('resDesc');
+
+        if (res.isGiornoFuoriTempo) {
+            titleEl.textContent = `Anno Naturale ${res.anno}`;
+            monthNameEl.textContent = `🌿 Giorno Fuori dal Tempo (20 Marzo)`;
+            descEl.textContent = `Giornata di azzeramento, festa e transizione. Un momento sospeso per celebrare il ciclo trascorso e prepararsi al nuovo risveglio.`;
+            return;
+        }
+
+        const mesePlate = document.getElementById(`m-${res.mese}`);
+        const meseText = document.getElementById(`mt-${res.mese}`);
+        const giornoPlate = document.getElementById(`d-${res.giorno}`);
+        const giornoText = document.getElementById(`dt-${res.giorno}`);
+
+        if (mesePlate) {
+            mesePlate.classList.add('active');
+            meseText.classList.add('text-active');
+        }
+        if (giornoPlate) {
+            giornoPlate.classList.add('active');
+            giornoText.classList.add('text-active');
+        }
+
+        const infoMese = temiMesi[res.mese];
+
+        titleEl.textContent = `Anno Naturale ${res.anno} • Mese ${res.mese}, Giorno ${res.giorno}`;
+        monthNameEl.textContent = infoMese.nome;
+        descEl.innerHTML = `<strong>Tema Archetipico:</strong> ${infoMese.tema}<br><br><em>Posizione:</em> Placca centrale M${res.mese} • Tassello del bordo ${res.giorno}/28.`;
+    }
+
+    window.onload = function() {
+        generaBordo28Giorni();
+        
+        const oggi = new Date();
+        const yyyy = oggi.getFullYear();
+        const mm = String(oggi.getMonth() + 1).padStart(2, '0');
+        const dd = String(oggi.getDate()).padStart(2, '0');
+        document.getElementById('dateInput').value = `${yyyy}-${mm}-${dd}`;
+        
+        calcolaEVisualizza();
+    };
+</script>
+
+</body>
+</html>
